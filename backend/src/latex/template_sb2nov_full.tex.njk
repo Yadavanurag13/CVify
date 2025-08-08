@@ -105,12 +105,19 @@
 %-----------PROJECTS-----------------
 <% if data.projects and data.projects.length %>
 \section{Projects}
-  \resumeSubHeadingListStart
+  \resumeItemListStart
   <% for p in data.projects %>
-    \resumeSubItem{<< p.name | escape_latex >><% if p.link %> (\href{<< p.link | escape_url >>}{link})<% endif %>}
-      {<% if p.description %><< p.description | escape_latex >><% endif %><% if p.bullets and p.bullets.length %> <% for b in p.bullets %>• << b | escape_latex >><% if not loop.last %>; <% endif %><% endfor %><% endif %>}
+    \resumeItem{<< p.name | escape_latex >><% if p.link %> (\href{<< p.link | escape_url >>}{link})<% endif %>}
+      {<% if p.description %><< p.description | escape_latex >><% endif %>}
+    <% if p.bullets and p.bullets.length %>
+      \resumeItemListStart
+      <% for b in p.bullets %>
+        \resumeItem{}{<< b | escape_latex >>}
+      <% endfor %>
+      \resumeItemListEnd
+    <% endif %>
   <% endfor %>
-  \resumeSubHeadingListEnd
+  \resumeItemListEnd
 <% endif %>
 
 %-----------EDUCATION-----------------
