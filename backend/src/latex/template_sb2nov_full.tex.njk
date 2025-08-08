@@ -1,0 +1,150 @@
+% Rendered from sb2nov resume style, templated via Nunjucks
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+% \input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{\vspace{-4pt}\scshape\raggedright\large}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generated PDF is machine readable/ATS parsable (pdfTeX only)
+% \pdfgentounicode=1
+
+% Custom commands
+\newcommand{\resumeItem}[2]{\item\small{\textbf{#1}{: #2 \\[-2pt]}}}
+\newcommand{\resumeHeading}[4]{
+  \begin{tabular*}{0.99\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small#3} & \textit{\small #4} \\
+  \end{tabular*}\\[-5pt]
+}
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+  \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small#3} & \textit{\small #4} \\
+  \end{tabular*}\\[-5pt]
+}
+\newcommand{\resumeSubSubheading}[2]{
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \textit{\small#1} & \textit{\small #2} \\
+  \end{tabular*}\\[-5pt]
+}
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\\[-4pt]}
+\renewcommand{\labelitemii}{$\circ$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}}
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{\Large << data.basics.name | escape_latex >>} & <% if data.basics.email %>Email: \href{mailto:<< data.basics.email | escape_url >>}{<< data.basics.email | escape_latex >>}<% endif %>\\
+  <% if data.basics.links and data.basics.links.length %>
+    <% for l in data.basics.links %>\href{<< l.url | escape_url >>}{<< l.label | escape_latex >>}\quad<% endfor %>
+  <% endif %>
+  <% if data.basics.location %> {\small (<< data.basics.location | escape_latex >>)}<% endif %>
+  & <% if data.basics.phone %>Mobile: \href{tel:<< data.basics.phone | escape_url >>}{<< data.basics.phone | escape_latex >>}<% endif %> \\
+\end{tabular*}
+
+%-----------SUMMARY-----------------
+<% if data.summary %>
+\section{Summary}
+<< data.summary | escape_latex >>
+<% endif %>
+
+%-----------EXPERIENCE-----------------
+<% if data.experience and data.experience.length %>
+\section{Experience}
+  \resumeSubHeadingListStart
+  <% for exp in data.experience %>
+    \resumeSubheading
+      {<< exp.company | escape_latex >>}{<< (exp.location or '') | escape_latex >>}
+      {<< exp.position | escape_latex >>}{<< exp.startDate | escape_latex >> -- << (exp.endDate or 'Present') | escape_latex >>}
+    <% if exp.bullets and exp.bullets.length %>
+      \resumeItemListStart
+      <% for b in exp.bullets %>
+        \resumeItem{}{<< b | escape_latex >>}
+      <% endfor %>
+      \resumeItemListEnd
+    <% endif %>
+  <% endfor %>
+  \resumeSubHeadingListEnd
+<% endif %>
+
+%-----------PROJECTS-----------------
+<% if data.projects and data.projects.length %>
+\section{Projects}
+  \resumeSubHeadingListStart
+  <% for p in data.projects %>
+    \resumeSubItem{<< p.name | escape_latex >><% if p.link %> (\href{<< p.link | escape_url >>}{link})<% endif %>}
+      {<% if p.description %><< p.description | escape_latex >><% endif %><% if p.bullets and p.bullets.length %> <% for b in p.bullets %>• << b | escape_latex >><% if not loop.last %>; <% endif %><% endfor %><% endif %>}
+  <% endfor %>
+  \resumeSubHeadingListEnd
+<% endif %>
+
+%-----------EDUCATION-----------------
+<% if data.education and data.education.length %>
+\section{Education}
+  \resumeSubHeadingListStart
+  <% for ed in data.education %>
+    \resumeSubheading
+      {<< ed.institution | escape_latex >>}{<< (ed.location or '') | escape_latex >>}
+      {<< ed.degree | escape_latex >><% if ed.area %>, << ed.area | escape_latex >><% endif %>}{<< (ed.startDate or '') | escape_latex >> -- << (ed.endDate or '') | escape_latex >>}
+  <% endfor %>
+  \resumeSubHeadingListEnd
+<% endif %>
+
+%-----------SKILLS-----------------
+<% if data.skills and data.skills.groups and data.skills.groups.length %>
+\section{Skills}
+  \resumeSubHeadingListStart
+  <% for g in data.skills.groups %>
+    \item{\textbf{<< g.label | escape_latex >>}{: << g.items | join(', ') | escape_latex >>}}
+  <% endfor %>
+  \resumeSubHeadingListEnd
+<% endif %>
+
+%-----------EXTRAS-----------------
+<% if data.extras and data.extras.length %>
+\section{Additional}
+  \resumeSubHeadingListStart
+  <% for ex in data.extras %>
+    \item{\textbf{<< ex.type | escape_latex >>}: <% for it in ex.items %> << it.label | escape_latex >><% if it.value %> — << it.value | escape_latex >><% endif %><% if it.dates %> (<< it.dates | escape_latex >>)<% endif %><% if not loop.last %>; <% endif %><% endfor %>}
+  <% endfor %>
+  \resumeSubHeadingListEnd
+<% endif %>
+
+\end{document}
+
+

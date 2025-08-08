@@ -1,0 +1,84 @@
+% Minimal sb2nov-style LaTeX using article class for MVP. We will swap to real sb2nov later.
+\documentclass[11pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlist[itemize]{noitemsep, topsep=0pt, left=0pt, label=--}
+
+\begin{document}
+
+{\LARGE << data.basics.name | escape_latex >> }\\
+<% if data.basics.headline %>\textit{ << data.basics.headline | escape_latex >> }\\<% endif %>
+<% if data.basics.email %>Email: << data.basics.email | escape_latex >>\quad<% endif %>
+<% if data.basics.phone %>Phone: << data.basics.phone | escape_latex >>\quad<% endif %>
+<% if data.basics.location %><< data.basics.location | escape_latex >>\quad<% endif %>
+<% if data.basics.links and (options and options.showLinks != false) %>
+\\
+<% for l in data.basics.links %>
+\href{ << l.url | escape_url >> }{ << l.label | escape_latex >> }\quad
+<% endfor %>
+<% endif %>
+
+\vspace{0.5em}
+\hrule
+\vspace{0.75em}
+
+<% if data.summary %>
+\section*{Summary}
+<< data.summary | escape_latex >>
+<% endif %>
+
+<% if data.experience and data.experience.length %>
+\section*{Experience}
+<% for exp in data.experience %>
+\textbf{ << exp.position | escape_latex >> } at \textit{ << exp.company | escape_latex >> }\hfill << exp.startDate | escape_latex >> -- << (exp.endDate or 'Present') | escape_latex >>\\
+<% if exp.location %><< exp.location | escape_latex >>\\<% endif %>
+<% if exp.bullets and exp.bullets.length %>
+\begin{itemize}
+<% for b in exp.bullets %>\item << b | escape_latex >><% endfor %>
+\end{itemize}
+<% endif %>
+\vspace{0.3em}
+<% endfor %>
+<% endif %>
+
+<% if data.projects and data.projects.length %>
+\section*{Projects}
+<% for p in data.projects %>
+\textbf{ << p.name | escape_latex >> }<% if p.link %> (\href{ << p.link | escape_url >> }{link})<% endif %>\\
+<% if p.description %><< p.description | escape_latex >>\\<% endif %>
+<% if p.bullets and p.bullets.length %>
+\begin{itemize}
+<% for b in p.bullets %>\item << b | escape_latex >><% endfor %>
+\end{itemize}
+<% endif %>
+\vspace{0.3em}
+<% endfor %>
+<% endif %>
+
+<% if data.education and data.education.length %>
+\section*{Education}
+<% for ed in data.education %>
+\textbf{ << ed.institution | escape_latex >> }\\
+<< ed.degree | escape_latex >><% if ed.area %>, << ed.area | escape_latex >><% endif %> \hfill << (ed.startDate or '') | escape_latex >> -- << (ed.endDate or '') | escape_latex >>\\
+<% if ed.location %><< ed.location | escape_latex >>\\<% endif %>
+<% if ed.notes and ed.notes.length %>
+\begin{itemize}
+<% for n in ed.notes %>\item << n | escape_latex >><% endfor %>
+\end{itemize}
+<% endif %>
+\vspace{0.3em}
+<% endfor %>
+<% endif %>
+
+<% if data.skills and data.skills.groups and data.skills.groups.length %>
+\section*{Skills}
+<% for g in data.skills.groups %>
+\textbf{ << g.label | escape_latex >> }: << g.items | join(', ') | escape_latex >>\\
+<% endfor %>
+<% endif %>
+
+\end{document}
+
