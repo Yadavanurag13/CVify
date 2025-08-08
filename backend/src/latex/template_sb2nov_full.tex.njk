@@ -94,7 +94,7 @@
     <% if exp.bullets and exp.bullets.length %>
       \resumeItemListStart
       <% for b in exp.bullets %>
-        \resumeItem{}{<< b | escape_latex >>}
+        \item \small{<< b | escape_latex >>}
       <% endfor %>
       \resumeItemListEnd
     <% endif %>
@@ -112,7 +112,7 @@
     <% if p.bullets and p.bullets.length %>
       \resumeItemListStart
       <% for b in p.bullets %>
-        \resumeItem{}{<< b | escape_latex >>}
+        \item \small{<< b | escape_latex >>}
       <% endfor %>
       \resumeItemListEnd
     <% endif %>

@@ -62,6 +62,7 @@ export default function Home() {
   const linksFA = useFieldArray({ control, name: "links" });
   const expFA = useFieldArray({ control, name: "experience" });
   const projectsFA = useFieldArray({ control, name: "projects" });
+  const skillsFA = useFieldArray({ control, name: "skills" });
 
   async function onSubmit(values: FormValues) {
     const payload = {
@@ -220,7 +221,40 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-        </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">Technical Skills</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => skillsFA.append({ label: "", items: [] })}
+                >
+                  Add Skill Group
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {skillsFA.fields.map((field, i) => (
+                  <div key={field.id} className="rounded border p-3 space-y-3">
+                    <div>
+                      <label className="text-xs">Group Label</label>
+                      <Input placeholder="e.g., Languages, Frameworks" {...register(`skills.${i}.label` as const)} />
+                    </div>
+                    <BulletsEditor
+                      control={control}
+                      name={`skills.${i}.items`}
+                      register={register}
+                      label="Items"
+                      placeholder="e.g., TypeScript"
+                    />
+                    <div className="flex justify-end">
+                      <Button type="button" variant="secondary" onClick={() => skillsFA.remove(i)}>Remove Group</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Rendering..." : "Render PDF"}
             </Button>
