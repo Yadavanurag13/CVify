@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -48,15 +48,21 @@ const Schema = z.object({
   skills: z.array(SkillGroupSchema).default([]),
 });
 
-type FormValues = z.infer<typeof Schema>;
+type FormValues = z.input<typeof Schema>;
 
 export default function Home() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(Schema), defaultValues: { name: "", headline: "", email: "", phone: "", location: "", links: [], summary: "", experience: [], education: [], projects: [], skills: [] } });
+
+  const linksFA = useFieldArray({ control, name: "links" });
+  const expFA = useFieldArray({ control, name: "experience" });
+  const projectsFA = useFieldArray({ control, name: "projects" });
+  const skillsFA = useFieldArray({ control, name: "skills" });
 
   async function onSubmit(values: FormValues) {
     const payload = {
@@ -68,13 +74,13 @@ export default function Home() {
           email: values.email,
           phone: values.phone,
           location: values.location,
-          links: values.links,
+          links: values.links ?? [],
         },
         summary: values.summary,
-        experience: values.experience.map((e) => ({ ...e, endDate: e.endDate || null })),
-        education: values.education,
-        projects: values.projects,
-        skills: { groups: values.skills },
+        experience: (values.experience ?? []).map((e) => ({ ...e, endDate: e.endDate || null })),
+        education: values.education ?? [],
+        projects: values.projects ?? [],
+        skills: { groups: values.skills ?? [] },
         extras: [],
       },
     };
@@ -119,17 +125,135 @@ export default function Home() {
               <label className="block text-sm font-medium mb-1">Summary</label>
               <Textarea rows={5} placeholder="Short professional summary" {...register("summary")} />
             </div>
-            <div className="grid grid-cols-1 gap-2">
-              <label className="block text-sm font-medium">Links (label,url per line)</label>
-              <Textarea rows={3} placeholder="GitHub, https://github.com/janedoe\nWebsite, https://janedoe.dev" onBlur={(e) => {
-                const lines = e.target.value.split("\n").map((l) => l.trim()).filter(Boolean);
-                const links = lines.map((l) => {
-                  const [label, url] = l.split(/,\s*/);
-                  return label && url ? { label, url } : null;
-                }).filter(Boolean) as {label:string;url:string}[];
-                // @ts-ignore
-                (window as any).setLinks && (window as any).setLinks(links);
-              }} />
+            <div>
+              <label className="block text-sm font-medium mb-2">Links</label>
+              <div className="space-y-3">
+                {linksFA.fields.map((field, idx) => (
+                  <div key={field.id} className="grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+                    <div className="md:col-span-2">
+                      <label className="text-xs">Label</label>
+                      <Input placeholder="Website" {...register(`links.${idx}.label` as const)} />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="text-xs">URL</label>
+                      <Input placeholder="https://example.com" {...register(`links.${idx}.url` as const)} />
+                    </div>
+                    <div className="md:col-span-1">
+                      <Button type="button" variant="secondary" onClick={() => linksFA.remove(idx)}>Remove</Button>
+                    </div>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => linksFA.append({ label: "", url: "" })}>Add Link</Button>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">Experience</label>
+                <Button type="button" variant="outline" onClick={() => expFA.append({ company: "", position: "", location: "", startDate: "", endDate: "", bullets: [] })}>Add Experience</Button>
+              </div>
+              <div className="space-y-4">
+                {expFA.fields.map((field, i) => (
+                  <div key={field.id} className="rounded border p-3 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs">Company</label>
+                        <Input {...register(`experience.${i}.company` as const)} />
+                      </div>
+                      <div>
+                        <label className="text-xs">Position</label>
+                        <Input {...register(`experience.${i}.position` as const)} />
+                      </div>
+                      <div>
+                        <label className="text-xs">Location</label>
+                        <Input {...register(`experience.${i}.location` as const)} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs">Start</label>
+                          <Input placeholder="YYYY-MM" {...register(`experience.${i}.startDate` as const)} />
+                        </div>
+                        <div>
+                          <label className="text-xs">End (blank = Present)</label>
+                          <Input placeholder="YYYY-MM" {...register(`experience.${i}.endDate` as const)} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <BulletsEditor control={control} name={`experience.${i}.bullets`} register={register} label="Bullets" placeholder="Impactful achievement" />
+
+                    <div className="flex justify-end">
+                      <Button type="button" variant="secondary" onClick={() => expFA.remove(i)}>Remove Experience</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">Projects</label>
+                <Button type="button" variant="outline" onClick={() => projectsFA.append({ name: "", link: "", description: "", bullets: [] })}>Add Project</Button>
+              </div>
+              <div className="space-y-4">
+                {projectsFA.fields.map((field, i) => (
+                  <div key={field.id} className="rounded border p-3 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs">Name</label>
+                        <Input {...register(`projects.${i}.name` as const)} />
+                      </div>
+                      <div>
+                        <label className="text-xs">Link</label>
+                        <Input placeholder="https://..." {...register(`projects.${i}.link` as const)} />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="text-xs">Description</label>
+                        <Textarea rows={3} {...register(`projects.${i}.description` as const)} />
+                      </div>
+                    </div>
+
+                    <BulletsEditor control={control} name={`projects.${i}.bullets`} register={register} label="Bullets" placeholder="Highlight" />
+
+                    <div className="flex justify-end">
+                      <Button type="button" variant="secondary" onClick={() => projectsFA.remove(i)}>Remove Project</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">Technical Skills</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => skillsFA.append({ label: "", items: [] })}
+                >
+                  Add Skill Group
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {skillsFA.fields.map((field, i) => (
+                  <div key={field.id} className="rounded border p-3 space-y-3">
+                    <div>
+                      <label className="text-xs">Group Label</label>
+                      <Input placeholder="e.g., Languages, Frameworks" {...register(`skills.${i}.label` as const)} />
+                    </div>
+                    <BulletsEditor
+                      control={control}
+                      name={`skills.${i}.items`}
+                      register={register}
+                      label="Items"
+                      placeholder="e.g., TypeScript"
+                    />
+                    <div className="flex justify-end">
+                      <Button type="button" variant="secondary" onClick={() => skillsFA.remove(i)}>Remove Group</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Rendering..." : "Render PDF"}
@@ -150,6 +274,38 @@ export default function Home() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+type BulletsEditorProps = {
+  control: any;
+  name: string;
+  register: any;
+  label: string;
+  placeholder?: string;
+};
+
+function BulletsEditor({ control, name, register, label, placeholder }: BulletsEditorProps) {
+  const bulletsFA = useFieldArray({ control, name });
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">{label}</span>
+        <Button type="button" size="sm" variant="outline" onClick={() => bulletsFA.append("")}>Add Bullet</Button>
+      </div>
+      <div className="space-y-2">
+        {bulletsFA.fields.map((bf, bi) => (
+          <div key={bf.id} className="grid grid-cols-6 gap-2 items-end">
+            <div className="col-span-5">
+              <Input placeholder={placeholder || "Bullet"} {...register(`${name}.${bi}`)} />
+            </div>
+            <div className="col-span-1">
+              <Button type="button" variant="secondary" onClick={() => bulletsFA.remove(bi)}>Remove</Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
